@@ -12,46 +12,75 @@ app.get('/', function (req, res) {
     return res.send('coming soon!');
 });
 
-app.get('/init/:token', (req, res) =>{
+function getUrl(token, options) {
+
+    youtubedl.getInfo(token.url, options, {}, function (err, info) {
+        if (err) {
+            return {
+                done : false,
+                status: 'error',
+                message: err
+            };
+        }
+
+        let createAt = new Date();
+
+        let data = {
+            title: info.title,
+            url: info.url,
+            server: token.server,
+            createAt: createAt.getTime()
+        };
+
+
+        return {
+            done : true,
+            status: 'ticket',
+            response: data,
+        }
+    });
+}
+
+app.get('/init/:token', (req, res) => {
 
     let token = JSON.parse(laravel.decrypt(req.params.token));
 
-    if(token){
+    if (token) {
 
         let options = [];
 
-        youtubedl.getInfo(token.url, options, {}, function(err, info) {
-            if (err) {
-                return res.json({
-                    status : 'error',
-                    message : err
-                });
-            }
-
-            let createAt = new Date();
-
-            let data = {
-                title : info.title,
-                url   : info.url,
-                server   : token.server,
-                createAt : createAt.getTime()
-            };
-
-
-            return res.json({
-                status: 'ticket',
-                response : data,
-            })
-        });
+        return res.json(getUrl(token, options));
     }
     else {
         return res.json({
-            status : 'error',
-            error : 'token',
-            message : 'invalid parameter for this token check your encryption key !'
+            status: 'error',
+            error: 'token',
+            message: 'invalid parameter for this token check your encryption key !'
         })
     }
 
+});
+
+app.get("/watch/:video", (req, res) => {
+    let token = JSON.parse(laravel.decrypt(req.query.token));
+
+    if (token) {
+
+        let options = [];
+        let video = getUrl(token, options);
+
+        if(video.done){
+            let videoRequest = request(video.url);
+            req.pipe(videoRequest);
+            return videoRequest.pipe(res);
+        }
+    }
+
+    return res.json({
+        status: 'error',
+        error: 'token',
+        message: 'invalid parameter for this token check your encryption key !'
+    })
 });
 
 app.get('/stream/:name', (req, res) => {
