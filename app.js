@@ -18,10 +18,9 @@ app.get('/init/:token', (req, res) =>{
 
     if(token){
 
-        let url = 'https://openload.co/embed/8PuTf23ybmo';
         let options = [];
 
-        youtubedl.getInfo(url, options, {}, function(err, info) {
+        youtubedl.getInfo(token.url, options, {}, function(err, info) {
             if (err) {
                 return res.json({
                     status : 'error',
