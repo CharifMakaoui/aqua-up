@@ -12,15 +12,15 @@ app.get('/', function (req, res) {
     return res.send('coming soon!');
 });
 
-function getUrl(token, options) {
+function getUrl(token, options, callback) {
 
     youtubedl.getInfo(token.url, options, {}, function (err, info) {
         if (err) {
-            return {
+            callback(true, {
                 done : false,
                 status: 'error',
                 message: err
-            };
+            });
         }
 
         let createAt = new Date();
@@ -32,12 +32,11 @@ function getUrl(token, options) {
             createAt: createAt.getTime()
         };
 
-
-        return {
+        callback(false, {
             done : true,
             status: 'ticket',
             response: data,
-        }
+        });
     });
 }
 
@@ -49,7 +48,9 @@ app.get('/init/:token', (req, res) => {
 
         let options = [];
 
-        return res.json(getUrl(token, options));
+        getUrl(token, options, (error, data) => {
+            return res.json({ data })
+        });
     }
     else {
         return res.json({
@@ -67,20 +68,29 @@ app.get("/watch/:video", (req, res) => {
     if (token) {
 
         let options = [];
-        let video = getUrl(token, options);
+        getUrl(token, options, (error, video) => {
 
-        if(video.done){
-            let videoRequest = request(video.url);
-            req.pipe(videoRequest);
-            return videoRequest.pipe(res);
-        }
+            if(error){
+                let videoRequest = request(video.url);
+                req.pipe(videoRequest);
+                videoRequest.pipe(res);
+            }
+
+            else{
+                return res.json(video);
+            }
+
+        });
+
+    }
+    else{
+        return res.json({
+            status: 'error',
+            error: 'token',
+            message: 'invalid parameter for this token check your encryption key !'
+        })
     }
 
-    return res.json({
-        status: 'error',
-        error: 'token',
-        message: 'invalid parameter for this token check your encryption key !'
-    })
 });
 
 app.get('/stream/:name', (req, res) => {
