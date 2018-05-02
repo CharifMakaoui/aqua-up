@@ -40,6 +40,55 @@ function getUrl(token, options, callback) {
     });
 }
 
+// in this version we get url and encrypt it to direct redirect to stream video
+app.get("/prepare/:video", (req, res) => {
+    let token = JSON.parse(laravel.decrypt(req.query.token));
+
+    if (token) {
+
+        let options = [];
+        getUrl(token, options, (error, video) => {
+
+            if(!error){
+                let encryptedUrl = laravel.encrypt(video.response.url);
+                return res.redirect('/watch/movie.mp4?token=' + encryptedUrl);
+            }
+
+            else{
+                return res.json(video);
+            }
+
+        });
+
+    }
+    else{
+        return res.json({
+            status: 'error',
+            error: 'token',
+            message: 'invalid parameter for this token check your encryption key !'
+        })
+    }
+
+});
+app.get('/watch/:video', (req, res) => {
+    let urlToPlay = laravel.decrypt(req.query.token);
+
+    if(urlToPlay){
+        let videoRequest = request(urlToPlay);
+        req.pipe(videoRequest);
+        videoRequest.pipe(res);
+    }
+    else{
+        return res.json({
+            status: 'error',
+            error: 'token',
+            message: 'invalid parameter for this token check your encryption key !'
+        })
+    }
+
+});
+
+// this version return video url and you send second request to stream video after you encrypt it in your backend
 app.get('/init/:token', (req, res) => {
 
     let token = JSON.parse(laravel.decrypt(req.params.token));
@@ -61,45 +110,6 @@ app.get('/init/:token', (req, res) => {
     }
 
 });
-
-app.get("/prepare/:video", (req, res) => {
-    let token = JSON.parse(laravel.decrypt(req.query.token));
-
-    if (token) {
-
-        let options = [];
-        getUrl(token, options, (error, video) => {
-
-            if(!error){
-                let encryptedUrl = laravel.encrypt(video.response.url);
-                return res.redirect('/watch/movie.mp4?token' + encryptedUrl);
-            }
-
-            else{
-                return res.json(video);
-            }
-
-        });
-
-    }
-    else{
-        return res.json({
-            status: 'error',
-            error: 'token',
-            message: 'invalid parameter for this token check your encryption key !'
-        })
-    }
-
-});
-
-app.get('/watch/:video', (req, res) => {
-    let urlToPlay = laravel.decrypt(req.query.token);
-
-    let videoRequest = request(urlToPlay);
-    req.pipe(videoRequest);
-    videoRequest.pipe(res);
-});
-
 app.get('/stream/:name', (req, res) => {
     let urlToPaly = laravel.decrypt(req.query.token);
 
