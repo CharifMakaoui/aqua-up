@@ -62,7 +62,7 @@ app.get('/init/:token', (req, res) => {
 
 });
 
-app.get("/watch/:video", (req, res) => {
+app.get("/prepare/:video", (req, res) => {
     let token = JSON.parse(laravel.decrypt(req.query.token));
 
     if (token) {
@@ -71,9 +71,8 @@ app.get("/watch/:video", (req, res) => {
         getUrl(token, options, (error, video) => {
 
             if(!error){
-                let videoRequest = request(video.response.url);
-                req.pipe(videoRequest);
-                videoRequest.pipe(res);
+                let encryptedUrl = laravel.encrypt(video.response.url);
+                return res.redirect('/watch/movie.mp4?token' + encryptedUrl);
             }
 
             else{
@@ -93,8 +92,15 @@ app.get("/watch/:video", (req, res) => {
 
 });
 
-app.get('/stream/:name', (req, res) => {
+app.get('/watch/:video', (req, res) => {
+    let urlToPlay = laravel.decrypt(req.query.token);
 
+    let videoRequest = request(urlToPlay);
+    req.pipe(videoRequest);
+    videoRequest.pipe(res);
+});
+
+app.get('/stream/:name', (req, res) => {
     let urlToPaly = laravel.decrypt(req.query.token);
 
     let video = request(urlToPaly);
