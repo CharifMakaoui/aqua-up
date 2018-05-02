@@ -1,0 +1,7 @@
+{
+  "name": "Aqua Screen Video Streaming",
+  "description": "Aqua Screen Video Streaming based on youtube-dl and pip function to work as proxy",
+  "repository": "https://github.com/heroku/node-js-sample",
+  "logo": "https://rawgit.com/heroku/node-js-sample/master/public/node.svg",
+  "keywords": ["node", "express", "static"]
+}
