@@ -70,7 +70,7 @@ app.get("/watch/:video", (req, res) => {
         let options = [];
         getUrl(token, options, (error, video) => {
 
-            if(error){
+            if(!error){
                 let videoRequest = request(video.url);
                 req.pipe(videoRequest);
                 videoRequest.pipe(res);
