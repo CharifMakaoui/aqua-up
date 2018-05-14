@@ -45,6 +45,15 @@ app.get('/test', (req, res) => {
             res.json(err);
         }
 
+        let videoDownload = require("./helpers/downloader/videoDownloader");
+
+        videoDownload.videoDownload(info.url, "./download/", (state, data) => {
+
+            if(state === "download-end"){
+                res.json(data);
+            }
+        });
+
         res.json(info);
     });
 

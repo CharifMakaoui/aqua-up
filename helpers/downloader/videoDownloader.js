@@ -1,6 +1,6 @@
 "use strict";
 
-module.exports.videoDownload = function (fileUrl, apiPath, callback) {
+module.exports.videoDownload = function (file_url, DOWNLOAD_DIR, callback) {
 
     let fs = require('fs');
     let url = require('url');
@@ -9,8 +9,8 @@ module.exports.videoDownload = function (fileUrl, apiPath, callback) {
     let spawn = require('child_process').spawn;
 
     // App variables
-    let file_url = 'http://upload.wikimedia.org/wikipedia/commons/4/4f/Big%26Small_edit_1.jpg';
-    let DOWNLOAD_DIR = './downloads/';
+    //let file_url = 'http://upload.wikimedia.org/wikipedia/commons/4/4f/Big%26Small_edit_1.jpg';
+    //let DOWNLOAD_DIR = './downloads/';
 
     // We will be downloading the files to a directory, so make sure it's there
     // This step is not required if you have manually created the directory
