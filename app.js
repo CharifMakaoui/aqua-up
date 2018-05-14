@@ -13,7 +13,7 @@ app.use(express.static(__dirname + '/node_modules'));
 app.use(express.static(__dirname + '/public'));
 
 let laravel = require('./helpers/laravel/laravel-decript');
-//let youtubedl = require('youtube-dl');
+let youtubedl = require('youtube-dl');
 
 io.on('connection', function(client) {
     console.log('Client connected...');
@@ -39,15 +39,9 @@ app.get('/ind', function (req, res) {
 
 
 
-
-
-
-
-
-
 app.get('/test', (req, res) => {
 
-    /*youtubedl.getInfo("https://openload.co/embed/vi-pJgDN1Ig", [], {}, function (err, info) {
+    youtubedl.getInfo("https://openload.co/embed/vi-pJgDN1Ig", [], {}, function (err, info) {
         if (err) {
             res.json(err);
         }
@@ -70,7 +64,7 @@ app.get('/test', (req, res) => {
         });
 
         res.json(info);
-    });*/
+    });
 
 });
 

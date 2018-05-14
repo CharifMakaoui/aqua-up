@@ -31,7 +31,11 @@
     "serve-favicon": "~2.4.5",
     "simple-stats-server": "0.0.5",
     "socket.io": "^2.1.0",
-    "youtube-dl": "^1.12.2"
+    "youtube-dl": "^1.12.2",
+    "ipfs-daemon": "^0.3.1",
+    "logplease": "latest",
+    "mkdirp": "latest",
+    "ipfsd-ctl": "latest"
   },
   "repository": {
     "type": "git",

@@ -1,4 +1,4 @@
-/*console.log("Starting IPFS daemon...");
+console.log("Starting IPFS daemon...");
 
 const IPFS = require('ipfs-daemon');
 const ipfs = new IPFS();
@@ -10,4 +10,4 @@ ipfs.on('ready', () => {
     console.log(ipfs.APIAddress);
 })
 
-ipfs.on('error', (e) => console.error(err));*/
+ipfs.on('error', (e) => console.error(err));
