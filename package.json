@@ -19,11 +19,13 @@
     "express": "*",
     "get-uri": "^2.0.1",
     "http-proxy": "^1.16.2",
+    "jquery": "^3.3.1",
     "lcrypt": "^1.0.2",
     "morgan": "~1.9.0",
     "request": "^2.83.0",
     "serve-favicon": "~2.4.5",
     "simple-stats-server": "0.0.5",
+    "socket.io": "^2.1.0",
     "youtube-dl": "^1.12.2"
   },
   "repository": {

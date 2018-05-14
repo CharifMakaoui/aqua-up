@@ -4,13 +4,64 @@ require('dotenv').config();
 let express = require('express');
 let request = require('request');
 let app = express();
-let laravel = require('./helpers/laravel-decript');
+let server = require('http').createServer(app);
+let io = require('socket.io')(server);
+
+app.use(express.static(__dirname + '/node_modules'));
+
+let laravel = require('./helpers/laravel/laravel-decript');
 let youtubedl = require('youtube-dl');
+
+io.on('connection', function(client) {
+    console.log('Client connected...');
+
+    client.on('join', function(data) {
+        console.log(data);
+    });
+
+    client.on('messages', function(data) {
+        client.emit('broad', data);
+        client.broadcast.emit('broad',data);
+    });
+});
 
 
 app.get('/', function (req, res) {
-    return res.send('coming soon!');
+    res.sendFile(__dirname + '/index.html');
 });
+
+
+
+
+
+
+
+
+
+app.get('/test', (req, res) => {
+
+    youtubedl.getInfo("https://openload.co/embed/vi-pJgDN1Ig", [], {}, function (err, info) {
+        if (err) {
+            res.json(err);
+        }
+
+        res.json(info);
+    });
+
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 function getUrl(token, options, callback) {
 
@@ -118,5 +169,4 @@ app.get('/stream/:name', (req, res) => {
     video.pipe(res);
 });
 
-
-app.listen(process.env.PORT || 5000);
+server.listen(process.env.PORT || 5000);
