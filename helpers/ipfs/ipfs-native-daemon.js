@@ -1,8 +1,8 @@
-'use strict'
+'use strict';
 
 const fs = require('fs');
 const mkdirp = require('mkdirp');
-const path = require('path')
+const path = require('path');
 const ipfsd = require('ipfsd-ctl');
 const IpfsDaemon = require('./ipfs-daemon.js');
 
@@ -25,11 +25,11 @@ class IpfsNativeDaemon extends IpfsDaemon {
         // Log errors
         process.on('uncaughtException', (error) => {
             // Skip 'ctrl-c' error and shutdown gracefully
-            const match = String(error).match(/non-zero exit code 255/)
+            const match = String(error).match(/non-zero exit code 255/);
             if(match)
                 this._handleShutdown();
             else
-                logger.error(error)
+                logger.error(error);
         });
 
         this._start()

@@ -51,7 +51,7 @@ app.get('/test', (req, res) => {
                 case "download-end" :
                     console.log("Starting IPFS daemon...");
 
-                    const IPFS = require('./helpers/ipfs/ipfs-native-daemon');
+                    const IPFS = require('ipfs-daemon');
                     const ipfs = new IPFS();
 
                     ipfs.on('error', (e) => console.error(e));
@@ -67,7 +67,6 @@ app.get('/test', (req, res) => {
                         ipfs.files.add(filesToUp, (err, files) => {
                             console.log(files);
                         });
-                        ipfs.stop();
                     });
 
                     console.log("file saved in : " + data);
