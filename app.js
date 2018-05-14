@@ -1,7 +1,12 @@
 "use strict";
+import fs from "fs";
 
 require('dotenv').config();
-require('./ipfs');
+
+console.log("Starting IPFS daemon...");
+
+const IPFS = require('ipfs-daemon');
+const ipfs = new IPFS();
 
 let express = require('express');
 let request = require('request');
@@ -47,31 +52,32 @@ app.get('/test', (req, res) => {
             res.json(err);
         }
 
-        let ipfsAPI = require('ipfs-api')
-        let ipfs = ipfsAPI('localhost', '5001', {protocol: 'http'})
-
-        ipfs.util.addFromURL(info.url, (err, result) => {
-            if (err) {
-                throw err
-            }
-            console.log(result)
-        })
-
-        //let videoDownload = require("./helpers/downloader/videoDownloader");
+        let videoDownload = require("./helpers/downloader/videoDownloader");
         // Download video from url (this case using yt-dl)
-        /*videoDownload.videoDownload(info.url, "./download/", info.fulltitle , (state, data) => {
+        videoDownload.videoDownload(info.url, "./download/", info.fulltitle , (state, data) => {
             switch(state){
                 case "download-progress" :
                     console.log("download progress : " + data);
                     break;
 
                 case "download-end" :
+                    ipfs.on('ready', () => {
+                        ipfs.files.add([
+                            {
+                                path: data,
+                                content: fs.createReadStream(data)
+                            }
+                        ]);
+                        ipfs.stop();
+                    });
+
+                    ipfs.on('error', (e) => console.error(err));
                     console.log("file saved in : " + data);
                     break;
 
                 default : console.log("default state")
             }
-        });*/
+        });
 
         res.json(info);
     });
