@@ -53,12 +53,16 @@ app.get('/test', (req, res) => {
 
                 case "download-end" :
                     ipfs.on('ready', () => {
-                        ipfs.files.add([
-                            {
-                                path: data,
-                                content: fs.createReadStream(data)
-                            }
-                        ]);
+
+                        let filesToUp = [];
+                        filesToUp.push({
+                            path: data,
+                            content: fs.createReadStream(data)
+                        });
+
+                        ipfs.files.add(filesToUp, (err, files) => {
+                            console.log(files);
+                        });
                         ipfs.stop();
                     });
 
