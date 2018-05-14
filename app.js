@@ -1,7 +1,7 @@
 "use strict";
 
 require('dotenv').config();
-require('./ipfs')
+//require('./ipfs')
 
 let express = require('express');
 let request = require('request');
@@ -10,9 +10,10 @@ let server = require('http').createServer(app);
 let io = require('socket.io')(server);
 
 app.use(express.static(__dirname + '/node_modules'));
+app.use(express.static(__dirname + '/public'));
 
 let laravel = require('./helpers/laravel/laravel-decript');
-let youtubedl = require('youtube-dl');
+//let youtubedl = require('youtube-dl');
 
 io.on('connection', function(client) {
     console.log('Client connected...');
@@ -28,8 +29,12 @@ io.on('connection', function(client) {
 });
 
 
-app.get('/', function (req, res) {
+app.get('/home', function (req, res) {
     res.sendFile(__dirname + '/index.html');
+});
+
+app.get('/ind', function (req, res) {
+    res.sendFile(__dirname + '/public/index.html');
 });
 
 
@@ -42,7 +47,7 @@ app.get('/', function (req, res) {
 
 app.get('/test', (req, res) => {
 
-    youtubedl.getInfo("https://openload.co/embed/vi-pJgDN1Ig", [], {}, function (err, info) {
+    /*youtubedl.getInfo("https://openload.co/embed/vi-pJgDN1Ig", [], {}, function (err, info) {
         if (err) {
             res.json(err);
         }
@@ -65,7 +70,7 @@ app.get('/test', (req, res) => {
         });
 
         res.json(info);
-    });
+    });*/
 
 });
 
