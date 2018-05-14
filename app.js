@@ -1,7 +1,7 @@
 "use strict";
 
 require('dotenv').config();
-require('./ipfs')
+
 
 let express = require('express');
 let request = require('request');
@@ -12,6 +12,10 @@ let io = require('socket.io')(server);
 app.use(express.static(__dirname + '/node_modules'));
 
 let laravel = require('./helpers/laravel/laravel-decript');
+
+let ipfsDemonStarter = require('./ipfs');
+ipfsDemonStarter.start();
+
 let youtubedl = require('youtube-dl');
 
 io.on('connection', function(client) {
@@ -49,8 +53,20 @@ app.get('/test', (req, res) => {
 
         let videoDownload = require("./helpers/downloader/videoDownloader");
 
+        if(ipfsDemonStarter.isStarted()){
+            let ipfsAPI = require('ipfs-api')
+            let ipfs = ipfsAPI('localhost', '5001', {protocol: 'http'})
+
+            ipfs.util.addFromURL(info.url, (err, result) => {
+                if (err) {
+                    throw err
+                }
+                console.log(result)
+            })
+        }
+
         // Download video from url (this case using yt-dl)
-        videoDownload.videoDownload(info.url, "./download/", info.fulltitle , (state, data) => {
+        /*videoDownload.videoDownload(info.url, "./download/", info.fulltitle , (state, data) => {
             switch(state){
                 case "download-progress" :
                     console.log("download progress : " + data);
@@ -62,7 +78,7 @@ app.get('/test', (req, res) => {
 
                 default : console.log("default state")
             }
-        });
+        });*/
 
         res.json(info);
     });
