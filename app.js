@@ -52,7 +52,24 @@ app.get('/test', (req, res) => {
                     console.log("Starting IPFS daemon...");
 
                     const IPFS = require('ipfs-daemon');
-                    const ipfs = new IPFS();
+                    const ipfs = new IPFS({
+                        IpfsDataDir: process.env.IPFS_PATH,
+                        LogDirectory: '/tmp',
+                        Flags: ['--enable-pubsub-experiment'],
+                        Addresses: {
+                            API: '/ip4/127.0.0.1/tcp/5001',
+                            Swarm: ['/ip4/0.0.0.0/tcp/4001'],
+                            Gateway: '/ip4/0.0.0.0/tcp/8080'
+                        },
+                        API: {
+                            HTTPHeaders: {
+                                "Access-Control-Allow-Origin": ['*'],
+                                "Access-Control-Allow-Methods": [],
+                                "Access-Control-Allow-Credentials": []
+                            }
+                        },
+                        SignalServer: null
+                    });
 
                     ipfs.on('error', (e) => console.error(e));
 
