@@ -1,6 +1,8 @@
 "use strict";
 
 require('dotenv').config();
+require('./ipfs')
+
 let express = require('express');
 let request = require('request');
 let app = express();
@@ -47,10 +49,18 @@ app.get('/test', (req, res) => {
 
         let videoDownload = require("./helpers/downloader/videoDownloader");
 
+        // Download video from url (this case using yt-dl)
         videoDownload.videoDownload(info.url, "./download/", info.fulltitle , (state, data) => {
+            switch(state){
+                case "download-progress" :
+                    console.log("download progress : " + data);
+                    break;
 
-            if(state === "download-end"){
-                res.json(data);
+                case "download-end" :
+                    console.log("file saved in : " + data);
+                    break;
+
+                default : console.log("default state")
             }
         });
 

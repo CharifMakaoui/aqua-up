@@ -9,9 +9,6 @@ module.exports.videoDownload = function (file_url, DOWNLOAD_DIR, file_name, call
     let exec = require('child_process').exec;
     let spawn = require('child_process').spawn;
 
-    // App variables
-    //let file_url = 'http://upload.wikimedia.org/wikipedia/commons/4/4f/Big%26Small_edit_1.jpg';
-    //let DOWNLOAD_DIR = './downloads/';
 
     // We will be downloading the files to a directory, so make sure it's there
     // This step is not required if you have manually created the directory
@@ -41,13 +38,9 @@ module.exports.videoDownload = function (file_url, DOWNLOAD_DIR, file_name, call
                 downloaded += data.length;
                 let progress = (100.0 * downloaded / len).toFixed(2);
                 callback('download-progress', progress);
-                console.log("download progress : " + progress);
             }).on('end', function() {
                 file.end();
-                console.log(file_name + ' downloaded to ' + DOWNLOAD_DIR);
                 callback('download-end', DOWNLOAD_DIR + file_name);
-
-                //TODO: Start encoding
             });
         });
     };
