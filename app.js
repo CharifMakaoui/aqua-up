@@ -1,13 +1,11 @@
 "use strict";
 
 require('dotenv').config();
-//require('./ipfs')
 
 let express = require('express');
 let request = require('request');
 let app = express();
 let server = require('http').createServer(app);
-let io = require('socket.io')(server);
 
 app.use(express.static(__dirname + '/node_modules'));
 app.use(express.static(__dirname + '/public'));
@@ -15,70 +13,10 @@ app.use(express.static(__dirname + '/public'));
 let laravel = require('./helpers/laravel/laravel-decript');
 let youtubedl = require('youtube-dl');
 
-io.on('connection', function(client) {
-    console.log('Client connected...');
-
-    client.on('join', function(data) {
-        console.log(data);
-    });
-
-    client.on('messages', function(data) {
-        client.emit('broad', data);
-        client.broadcast.emit('broad',data);
-    });
-});
-
-
-app.get('/home', function (req, res) {
-    res.sendFile(__dirname + '/index.html');
-});
 
 app.get('/ind', function (req, res) {
     res.sendFile(__dirname + '/public/index.html');
 });
-
-
-
-app.get('/test', (req, res) => {
-
-    youtubedl.getInfo("https://openload.co/embed/vi-pJgDN1Ig", [], {}, function (err, info) {
-        if (err) {
-            res.json(err);
-        }
-
-        let videoDownload = require("./helpers/downloader/videoDownloader");
-
-        // Download video from url (this case using yt-dl)
-        videoDownload.videoDownload(info.url, "./download/", info.fulltitle , (state, data) => {
-            switch(state){
-                case "download-progress" :
-                    console.log("download progress : " + data);
-                    break;
-
-                case "download-end" :
-                    console.log("file saved in : " + data);
-                    break;
-
-                default : console.log("default state")
-            }
-        });
-
-        res.json(info);
-    });
-
-});
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 function getUrl(token, options, callback) {
@@ -188,3 +126,4 @@ app.get('/stream/:name', (req, res) => {
 });
 
 server.listen(process.env.PORT || 5000);
+console.log("server running on localhost:" + process.env.PORT || 5000);
