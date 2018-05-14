@@ -1,13 +1,7 @@
 "use strict";
-import fs from "fs";
-
 require('dotenv').config();
 
-console.log("Starting IPFS daemon...");
-
-const IPFS = require('ipfs-daemon');
-const ipfs = new IPFS();
-
+let fs = require('fs');
 let express = require('express');
 let request = require('request');
 let app = express();
@@ -18,6 +12,9 @@ app.use(express.static(__dirname + '/node_modules'));
 
 let laravel = require('./helpers/laravel/laravel-decript');
 let youtubedl = require('youtube-dl');
+
+const IPFS = require('ipfs-daemon');
+const ipfs = new IPFS();
 
 io.on('connection', function(client) {
     console.log('Client connected...');
@@ -36,12 +33,6 @@ io.on('connection', function(client) {
 app.get('/', function (req, res) {
     res.sendFile(__dirname + '/index.html');
 });
-
-
-
-
-
-
 
 
 
