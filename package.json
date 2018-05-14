@@ -17,6 +17,7 @@
     "debug": "~2.6.9",
     "dotenv": "^5.0.0",
     "express": "*",
+    "follow-redirects": "^1.4.1",
     "get-uri": "^2.0.1",
     "http-proxy": "^1.16.2",
     "jquery": "^3.3.1",

@@ -1,10 +1,11 @@
 "use strict";
 
-module.exports.videoDownload = function (file_url, DOWNLOAD_DIR, callback) {
+module.exports.videoDownload = function (file_url, DOWNLOAD_DIR, file_name, callback) {
 
     let fs = require('fs');
     let url = require('url');
-    let http = require('http');
+    let http = require('follow-redirects').http;
+    let https = require('follow-redirects').https;
     let exec = require('child_process').exec;
     let spawn = require('child_process').spawn;
 
@@ -24,14 +25,13 @@ module.exports.videoDownload = function (file_url, DOWNLOAD_DIR, callback) {
     let download_file_httpGet = function(file_url) {
         let options = {
             host: url.parse(file_url).host,
-            port: 80,
             path: url.parse(file_url).pathname
         };
 
-        let file_name = url.parse(file_url).pathname.split('/').pop();
+        //let file_name = url.parse(file_url).pathname.split('/').pop();
         let file = fs.createWriteStream(DOWNLOAD_DIR + file_name);
 
-        http.get(options, function(res) {
+        https.get(options, function(res) {
 
             let len = parseInt(res.headers['content-length'], 10);
             let downloaded = 0;
