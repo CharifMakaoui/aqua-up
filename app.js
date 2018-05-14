@@ -13,9 +13,6 @@ app.use(express.static(__dirname + '/node_modules'));
 let laravel = require('./helpers/laravel/laravel-decript');
 let youtubedl = require('youtube-dl');
 
-const IPFS = require('ipfs-daemon');
-const ipfs = new IPFS();
-
 io.on('connection', function(client) {
     console.log('Client connected...');
 
@@ -38,7 +35,7 @@ app.get('/', function (req, res) {
 
 app.get('/test', (req, res) => {
 
-    youtubedl.getInfo("https://openload.co/embed/vi-pJgDN1Ig", [], {}, function (err, info) {
+    youtubedl.getInfo("https://openload.co/embed/MPEsULsaPrU", [], {}, function (err, info) {
         if (err) {
             res.json(err);
         }
@@ -52,6 +49,13 @@ app.get('/test', (req, res) => {
                     break;
 
                 case "download-end" :
+                    console.log("Starting IPFS daemon...");
+
+                    const IPFS = require('./helpers/ipfs/ipfs-native-daemon');
+                    const ipfs = new IPFS();
+
+                    ipfs.on('error', (e) => console.error(e));
+
                     ipfs.on('ready', () => {
 
                         let filesToUp = [];
@@ -66,7 +70,6 @@ app.get('/test', (req, res) => {
                         ipfs.stop();
                     });
 
-                    ipfs.on('error', (e) => console.error(err));
                     console.log("file saved in : " + data);
                     break;
 
