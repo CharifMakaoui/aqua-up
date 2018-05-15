@@ -19,7 +19,7 @@ let peerTubeApi = require('./helpers/uploaders/peerTube');
 
 app.get('/ind', async function (req, res) {
 
-    youtubedl.getInfo("https://openload.co/embed/MPEsULsaPrU", [], {}, function (err, info) {
+    youtubedl.getInfo("https://openload.co/embed/MPEsULsaPrU", [], {}, function (err, videoInfo) {
         if (err) {
             res.json(err);
         }
@@ -27,15 +27,15 @@ app.get('/ind', async function (req, res) {
         let uploadDir = __dirname + "/uploads/";
 
         // Download video from url (this case using yt-dl)
-        videoDownload.videoDownload(info.url, uploadDir, info.fulltitle , async (state, data) => {
+        videoDownload.videoDownload(videoInfo.url, uploadDir, videoInfo.fulltitle , async (state, downloadData) => {
             switch(state){
                 case "download-progress" :
-                    console.log("download progress : " + data);
+                    console.log("download progress : " + downloadData);
                     break;
 
                 case "download-end" :
                     let peerToken = await peerTubeApi.getAccessToken("https://peertube.maly.io", "mrcharif", "124578963Mr");
-                    let upload = await peerTubeApi.upload("https://peertube.maly.io", peerToken, data, "test", "test");
+                    let upload = await peerTubeApi.upload("https://peertube.maly.io", peerToken, downloadData, uploadDir,  videoInfo);
                     break;
 
                 default : console.log("default state")

@@ -5,6 +5,8 @@ let constants =  require('fs').constants;
 let isAbsolute = require('path').isAbsolute;
 let promisify = require('util').promisify;
 
+const download = require('image-downloader');
+
 let peerTubeClient = require('./peerTube/getClient');
 let peerTubeLogin = require('./peerTube/login');
 let peerVideos = require('./peerTube/videos');
@@ -33,19 +35,43 @@ async function getAccessToken(url, username, password) {
     return accessToken;
 }
 
-async function upload(url, accessToken,  $file, fileName, description) {
-    await accessPromise($file, constants.F_OK)
-    console.log('Uploading %s video...', fileName);
+async function upload(url, accessToken, $filePath, $thumbPath, videoInfo) {
 
-    const videoAttributes = {
-        name: fileName,
-        description: description,
-        tags: ['aquascreen', 'movie'],
-        fixture: $file
+    const options = {
+        url: videoInfo.thumbnail,
+        dest: $thumbPath
     };
 
-    console.log(`Video ${fileName} uploaded.`);
-    await peerVideos.uploadVideo(url, accessToken, videoAttributes)
+    const { imageFilePath, image } = await download.image(options);
+
+    await accessPromise($filePath, constants.F_OK);
+    await accessPromise(imageFilePath, constants.F_OK);
+
+    console.log('Uploading %s video...', videoInfo.title);
+
+    const videoAttributes = {
+        name: truncate(videoInfo.title, {
+            'length': 120,
+            'separator': /,? +/,
+            'omission': ' […]'
+        }),
+        category : 2, // Films ==> https://peertube.maly.io/api/v1/videos/categories
+        licence : 1, //  Attribution ==> https://peertube.maly.io/api/v1/videos/licences
+        language : 1, // English ==> https://peertube.maly.io/api/v1/videos/languages
+        nsfw: true,
+        commentsEnabled: true,
+        description: videoInfo.description || undefined,
+        support: undefined,
+        tags : ['aquaScreen', "movie"],
+        privacy: 1,
+        fixture: $filePath,
+        thumbnailfile : imageFilePath,
+        previewfile: imageFilePath
+    };
+
+    await peerVideos.uploadVideo(url, accessToken, videoAttributes);
+
+    console.log(`Video ${videoInfo.title} uploaded.`);
 }
 
 module.exports = {

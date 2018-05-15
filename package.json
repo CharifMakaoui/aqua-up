@@ -20,6 +20,7 @@
     "follow-redirects": "^1.4.1",
     "get-uri": "^2.0.1",
     "http-proxy": "^1.16.2",
+    "image-downloader": "^3.3.0",
     "jquery": "^3.3.1",
     "lcrypt": "^1.0.2",
     "request": "^2.83.0",
