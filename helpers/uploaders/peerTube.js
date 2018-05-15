@@ -67,9 +67,12 @@ async function upload(url, accessToken, $filePath, $thumbPath, videoInfo) {
         previewfile: filename
     };
 
-    await peerVideos.uploadVideo(url, accessToken, videoAttributes);
+    let videoData = await peerVideos.uploadVideo(url, accessToken, videoAttributes);
 
     console.log(`Video ${videoInfo.title} uploaded.`);
+    console.log(videoData);
+
+    return videoData;
 }
 
 module.exports = {

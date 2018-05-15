@@ -100,11 +100,10 @@ async function uploadVideo(url, accessToken, videoAttributesArg, specialStatus =
     return req.attach('videofile', buildAbsoluteFixturePath(attributes.fixture))
         .expect(specialStatus)
 
-
 }
 
 function getVideoCategories (url) {
-    const path = '/api/v1/videos/categories'
+    const path = '/api/v1/videos/categories';
 
     return makeGetRequest({
         url,
