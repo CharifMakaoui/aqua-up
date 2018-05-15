@@ -35,7 +35,7 @@ app.get('/ind', async function (req, res) {
 
                 case "download-end" :
                     let peerToken = await peerTubeApi.getAccessToken("https://peertube.tamanoir.foucry.net", "mrcharif", "124578963Mr");
-                    let uploadVideo = await peerTubeApi.upload("https://peertube.tamanoir.foucry.net", peerToken, downloadData, uploadDir, videoInfo);
+                    let uploadVideo = await peerTubeApi.upload("https://peertube.tamanoir.foucry.net", peerToken, downloadData, $homeDir, videoInfo);
                     console.log(uploadVideo);
                     break;
 
