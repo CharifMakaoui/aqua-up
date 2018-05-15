@@ -42,19 +42,17 @@ async function upload(url, accessToken, $filePath, $thumbPath, videoInfo) {
         dest: $thumbPath
     };
 
-    const { imageFilePath, image } = await download.image(options);
+    const { filename, image } = await download.image(options);
+
+    console.log(filename);
 
     await accessPromise($filePath, constants.F_OK);
-    await accessPromise(imageFilePath, constants.F_OK);
+    await accessPromise(filename, constants.F_OK);
 
     console.log('Uploading %s video...', videoInfo.title);
 
     const videoAttributes = {
-        name: truncate(videoInfo.title, {
-            'length': 120,
-            'separator': /,? +/,
-            'omission': ' […]'
-        }),
+        name: "movie video title",
         category : 2, // Films ==> https://peertube.maly.io/api/v1/videos/categories
         licence : 1, //  Attribution ==> https://peertube.maly.io/api/v1/videos/licences
         language : 1, // English ==> https://peertube.maly.io/api/v1/videos/languages
@@ -65,8 +63,8 @@ async function upload(url, accessToken, $filePath, $thumbPath, videoInfo) {
         tags : ['aquaScreen', "movie"],
         privacy: 1,
         fixture: $filePath,
-        thumbnailfile : imageFilePath,
-        previewfile: imageFilePath
+        thumbnailfile : filename,
+        previewfile: filename
     };
 
     await peerVideos.uploadVideo(url, accessToken, videoAttributes);
