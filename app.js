@@ -19,7 +19,7 @@ let peerTubeApi = require('./helpers/uploaders/peerTube');
 
 app.get('/ind', async function (req, res) {
 
-    youtubedl.getInfo("https://openload.co/embed/1-weipQpG6s", [], {}, function (err, videoInfo) {
+    youtubedl.getInfo("https://streamango.com/embed/asqokcascnfrkrbs", [], {}, function (err, videoInfo) {
         if (err) {
             res.json(err);
         }
