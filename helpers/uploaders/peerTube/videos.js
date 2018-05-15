@@ -3,6 +3,22 @@ let isAbsolute = require('path').isAbsolute;
 
 let peerTubeUsers = require('./users');
 
+function makeGetRequest (options = {}) {
+    if (!options.statusCodeExpected) options.statusCodeExpected = 400;
+
+    const req = request(options.url)
+        .get(options.path)
+        .set('Accept', 'application/json');
+
+    if (options.token) req.set('Authorization', 'Bearer ' + options.token);
+    if (options.query) req.query(options.query);
+
+    return req
+        .expect('Content-Type', /json/)
+        .expect(options.statusCodeExpected)
+}
+
+
 function buildAbsoluteFixturePath (path) {
     if (isAbsolute(path)) {
         return path
@@ -87,7 +103,18 @@ async function uploadVideo(url, accessToken, videoAttributesArg, specialStatus =
 
 }
 
+function getVideoCategories (url) {
+    const path = '/api/v1/videos/categories'
+
+    return makeGetRequest({
+        url,
+        path,
+        statusCodeExpected: 200
+    })
+}
+
 module.exports = {
     uploadVideo,
-    searchVideo
+    searchVideo,
+    getVideoCategories
 };

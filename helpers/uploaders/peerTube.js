@@ -84,7 +84,7 @@ function processVideo(url, accesstoken, info, languageCode) {
 }
 
 async function uploadVideoOnPeerTube(url, accesstoken, videoInfo, videoPath, language) {
-    const category = await getCategory(videoInfo.categories);
+    const category = await getCategory(url, videoInfo.categories);
     const licence = getLicence(videoInfo.license);
     let tags = []
     if (Array.isArray(videoInfo.tags)) {
@@ -183,14 +183,14 @@ function fetchObject(info) {
     })
 }
 
-async function getCategory(categories) {
+async function getCategory(url, categories) {
     if (!categories) return undefined;
 
     const categoryString = categories[0];
 
     if (categoryString === 'News & Politics') return 11;
 
-    const res = await getVideoCategories(program['url']);
+    const res = await peerVideos.getVideoCategories(url);
     const categoriesServer = res.body;
 
     for (const key of Object.keys(categoriesServer)) {
@@ -210,10 +210,10 @@ function getLicence(licence) {
 }
 
 function buildUrl(info) {
-    const webpageUrl = info.webpage_url as string;
+    const webpageUrl = info.webpage_url;
     if (webpageUrl && webpageUrl.match(/^https?:\/\//)) return webpageUrl;
 
-    const url = info.url as string;
+    const url = info.url;
     if (url && url.match(/^https?:\/\//)) return url;
 
     // It seems youtube-dl does not return the video url
