@@ -1,7 +1,7 @@
 "use strict";
 
-let access =  require('fs').access;
-let constants =  require('fs').constants;
+let access = require('fs').access;
+let constants = require('fs').constants;
 let isAbsolute = require('path').isAbsolute;
 let promisify = require('util').promisify;
 
@@ -37,7 +37,7 @@ async function getAccessToken(url, username, password) {
 
 async function upload(url, accessToken, $filePath, $homeDir, videoInfo) {
 
-    let thumbImage = null;
+    let thumbImage = undefined;
 
     if(videoInfo.thumbnail){
         const options = {
@@ -47,9 +47,6 @@ async function upload(url, accessToken, $filePath, $homeDir, videoInfo) {
 
         const { filename, image } = await download.image(options);
         thumbImage = filename;
-    }
-    else {
-        thumbImage = $homeDir + "/public/thumb.png"
     }
 
 
@@ -62,26 +59,33 @@ async function upload(url, accessToken, $filePath, $homeDir, videoInfo) {
 
     const videoAttributes = {
         name: "movie video title",
-        //description: "movie video description",
+        description: "movie video description",
 
         fixture: $filePath,
-        thumbnailfile : thumbImage,
+        thumbnailfile: thumbImage,
         previewfile: thumbImage,
 
-        category : 2, // Films ==> https://peertube.maly.io/api/v1/videos/categories
-        licence : 1, //  Attribution ==> https://peertube.maly.io/api/v1/videos/licences
-        language : "en", // English ==> https://peertube.maly.io/api/v1/videos/languages
-        privacy: 3,
+        tags: ["aquaScreen", "movies"],
+
+        category: 2, // Films ==> https://peertube.maly.io/api/v1/videos/categories
+        licence: 1, //  Attribution ==> https://peertube.maly.io/api/v1/videos/licences
+        language: "en", // English ==> https://peertube.maly.io/api/v1/videos/languages
+        privacy: 2,
 
         nsfw: "false",
         commentsEnabled: "true",
     };
 
-    let videoData = await peerVideos.uploadVideo(url, accessToken, videoAttributes);
+    try {
+        let videoData = await peerVideos.uploadVideo(url, accessToken, videoAttributes);
 
-    console.log(`Video ${videoInfo.title} uploaded.`);
+        console.log(`Video ${videoInfo.title} uploaded.`);
 
-    return videoData.body;
+        return videoData.body;
+    }
+    catch (e){
+        console.log(e);
+    }
 }
 
 module.exports = {

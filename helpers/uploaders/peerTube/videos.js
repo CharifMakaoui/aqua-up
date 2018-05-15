@@ -102,16 +102,7 @@ async function uploadVideo(url, accessToken, videoAttributesArg, specialStatus =
             let progress = (100.0 * e.loaded / e.total).toFixed(2);
             console.log('Percentage done: ', progress);
         })
-        .end(function(res){
-            if (res.ok) {
-                console.log(res.body);
-            } else {
-                console.log(res.body);
-                //console.log(res.);
-            }
-        })
         .expect(specialStatus);
-
 }
 
 function getVideoCategories (url) {
