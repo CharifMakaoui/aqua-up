@@ -19,7 +19,9 @@ let peerTubeApi = require('./helpers/uploaders/peerTube');
 
 app.get('/ind', async function (req, res) {
 
-    youtubedl.getInfo("https://streamango.com/embed/asqokcascnfrkrbs", [], {}, function (err, videoInfo) {
+    let videoUrl = "https://streamango.com/embed/mboofaaentnbbmlk";
+
+    youtubedl.getInfo(videoUrl, [], {}, function (err, videoInfo) {
         if (err) {
             res.json(err);
         }
@@ -34,7 +36,7 @@ app.get('/ind', async function (req, res) {
                     break;
 
                 case "download-end" :
-                    let peerServer = "https://peertube.maly.io";
+                    let peerServer = "https://peertube.tamanoir.foucry.net";
                     let peerToken = await peerTubeApi.getAccessToken(peerServer, "mrcharif", "124578963Mr");
                     let uploadVideo = await peerTubeApi.upload(peerServer, peerToken, downloadData, $homeDir, videoInfo);
                     console.log(uploadVideo);

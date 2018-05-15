@@ -54,12 +54,12 @@ async function uploadVideo(url, accessToken, videoAttributesArg, specialStatus =
         licence: 4,
         language: 'zh',
         channelId: defaultChannelId,
-        nsfw: true,
+        nsfw: "true",
         description: 'my super description',
         support: 'my super support text',
         tags: [ 'tag' ],
-        privacy: 1,
-        commentsEnabled: true,
+        privacy: 3,
+        commentsEnabled: "true",
         fixture: 'video_short.webm'
     }, videoAttributesArg);
 
@@ -68,22 +68,22 @@ async function uploadVideo(url, accessToken, videoAttributesArg, specialStatus =
         .set('Accept', 'application/json')
         .set('Authorization', 'Bearer ' + accessToken)
         .field('name', attributes.name)
-        .field('nsfw', JSON.stringify(attributes.nsfw))
-        .field('commentsEnabled', JSON.stringify(attributes.commentsEnabled))
-        .field('privacy', attributes.privacy.toString())
+        .field('nsfw', attributes.nsfw)
+        .field('commentsEnabled', attributes.commentsEnabled)
+        .field('privacy', attributes.privacy)
         .field('channelId', attributes.channelId);
 
     if (attributes.description !== undefined) {
         req.field('description', attributes.description)
     }
     if (attributes.language !== undefined) {
-        req.field('language', attributes.language.toString())
+        req.field('language', attributes.language)
     }
     if (attributes.category !== undefined) {
-        req.field('category', attributes.category.toString())
+        req.field('category', attributes.category)
     }
     if (attributes.licence !== undefined) {
-        req.field('licence', attributes.licence.toString())
+        req.field('licence', attributes.licence)
     }
 
     for (let i = 0; i < attributes.tags.length; i++) {
@@ -98,7 +98,19 @@ async function uploadVideo(url, accessToken, videoAttributesArg, specialStatus =
     }
 
     return req.attach('videofile', buildAbsoluteFixturePath(attributes.fixture))
-        .expect(specialStatus)
+        .on('progress', function(e) {
+            let progress = (100.0 * e.loaded / e.total).toFixed(2);
+            console.log('Percentage done: ', progress);
+        })
+        .end(function(res){
+            if (res.ok) {
+                console.log(res.body);
+            } else {
+                console.log(res.body);
+                //console.log(res.);
+            }
+        })
+        .expect(specialStatus);
 
 }
 
