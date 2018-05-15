@@ -35,21 +35,21 @@ async function getAccessToken(url, username, password) {
     return accessToken;
 }
 
-async function upload(url, accessToken, $filePath, $thumbPath, videoInfo) {
+async function upload(url, accessToken, $filePath, $homeDir, videoInfo) {
 
     let thumbImage = null;
 
     if(videoInfo.thumbnail){
         const options = {
             url: videoInfo.thumbnail,
-            dest: $thumbPath
+            dest: $homeDir + "/uploads/"
         };
 
         const { filename, image } = await download.image(options);
         thumbImage = filename;
     }
     else {
-        thumbImage = __dirname + "/../../public/thumb.png"
+        thumbImage = $homeDir + "/public/thumb.png"
     }
 
 

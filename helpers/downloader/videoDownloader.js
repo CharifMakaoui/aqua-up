@@ -7,6 +7,7 @@ module.exports.videoDownload = function (file_url, DOWNLOAD_DIR, file_name, call
     let https = require('follow-redirects').http;
     let exec = require('child_process').exec;
 
+    DOWNLOAD_DIR = DOWNLOAD_DIR + "/uploads/";
 
     // We will be downloading the files to a directory, so make sure it's there
     // This step is not required if you have manually created the directory

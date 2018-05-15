@@ -24,10 +24,10 @@ app.get('/ind', async function (req, res) {
             res.json(err);
         }
 
-        let uploadDir = __dirname + "/uploads/";
+        let $homeDir = __dirname;
 
         // Download video from url (this case using yt-dl)
-        videoDownload.videoDownload(videoInfo.url, uploadDir, videoInfo.fulltitle , async (state, downloadData) => {
+        videoDownload.videoDownload(videoInfo.url, $homeDir, videoInfo.fulltitle , async (state, downloadData) => {
             switch(state){
                 case "download-progress" :
                     console.log("Download Progress ==> " + downloadData);
