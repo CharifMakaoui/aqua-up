@@ -44,43 +44,42 @@ async function getAccessToken(url, username, password) {
     return accessToken;
 }
 
-function processVideo(url, accesstoken, info, languageCode) {
-    return new Promise(async res => {
-        console.log('Fetching object.', info);
+async function processVideo(url, accesstoken, info, languageCode) {
 
-        const videoInfo = await fetchObject(info);
-        console.log('Fetched object.', videoInfo);
+    console.log('Fetching object.', info);
 
-        const result = await peerVideos.searchVideo(url, videoInfo.title);
+    const videoInfo = await fetchObject(info);
+    console.log('Fetched object.', videoInfo);
 
-        console.log('############################################################\n');
+    const result = await peerVideos.searchVideo(url, videoInfo.title);
 
-        if (result.body.data.find(v => v.name === videoInfo.title)) {
-            console.log('Video "%s" already exists, don\'t reupload it.\n', videoInfo.title);
-            return res()
-        }
+    console.log('############################################################\n');
 
-        const path = join(__dirname, new Date().getTime() + '.mp4');
+    if (result.body.data.find(v => v.name === videoInfo.title)) {
+        console.log('Video "%s" already exists, don\'t reupload it.\n', videoInfo.title);
+        return 'Video ' + videoInfo.title + ' already exists, don\'t reupload it.\n';
+    }
 
-        console.log('Downloading video "%s"...', videoInfo.title);
+    const path = join(__dirname, new Date().getTime() + '.mp4');
 
-        const options = ['-f', 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best', '-o', path];
-        try {
-            youtubeDL.exec(videoInfo.url, options, processOptions, async (err, output) => {
-                if (err) {
-                    console.error(err);
-                    return res()
-                }
+    console.log('Downloading video "%s"...', videoInfo.title);
 
-                console.log(output.join('\n'));
-                await uploadVideoOnPeerTube(url, accesstoken, normalizeObject(videoInfo), path, languageCode);
-                return res()
-            })
-        } catch (err) {
-            console.log(err.message);
-            return res()
-        }
-    })
+    const options = ['-f', 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best', '-o', path];
+    try {
+        youtubeDL.exec(videoInfo.url, options, processOptions, async (err, output) => {
+            if (err) {
+                console.error(err);
+                return err
+            }
+
+            console.log(output.join('\n'));
+            await uploadVideoOnPeerTube(url, accesstoken, normalizeObject(videoInfo), path, languageCode);
+            return "done"
+        })
+    } catch (err) {
+        console.log(err.message);
+        return err;
+    }
 }
 
 async function uploadVideoOnPeerTube(url, accesstoken, videoInfo, videoPath, language) {
@@ -122,20 +121,15 @@ async function uploadVideoOnPeerTube(url, accesstoken, videoInfo, videoPath, lan
         fixture: videoPath,
         thumbnailfile,
         previewfile: thumbnailfile
-    }
+    };
 
-    console.log('\nUploading on PeerTube video "%s".', videoAttributes.name)
+    console.log('\nUploading on PeerTube video "%s".', videoAttributes.name);
     try {
         await peerVideos.uploadVideo(url, accesstoken, videoAttributes)
     } catch (err) {
         console.log(err.message);
         return err;
     }
-
-    /*await unlinkPromise(videoPath)
-    if (thumbnailfile) {
-        await unlinkPromise(thumbnailfile)
-    }*/
 
     console.log('Uploaded video "%s"!\n', videoAttributes.name)
 }
@@ -145,9 +139,9 @@ function normalizeObject(obj) {
 
     for (const key of Object.keys(obj)) {
         // Deprecated key
-        if (key === 'resolution') continue
+        if (key === 'resolution') continue;
 
-        const value = obj[key]
+        const value = obj[key];
 
         if (typeof value === 'string') {
             newObj[key] = value.normalize()
