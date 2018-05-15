@@ -24,10 +24,14 @@ app.get('/ind', async function (req, res) {
             res.json(err);
         }
 
-        let uploadDir = __dirname + "/uploads/";
+        //let uploadDir = __dirname + "/uploads/";
 
         let peerToken = await peerTubeApi.getAccessToken("https://peertube.maly.io", "mrcharif", "124578963Mr");
-        peerTubeApi.processVideo("https://peertube.maly.io", peerToken, info, "en");
+        peerTubeApi.processVideo("https://peertube.maly.io", peerToken, info, "en").then(data => {
+            console.log(data);
+        }).catch(error =>{
+            console.log(error);
+        });
 
         // Download video from url (this case using yt-dl)
         /*videoDownload.videoDownload(info.url, uploadDir, info.fulltitle , async (state, data) => {
