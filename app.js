@@ -30,12 +30,11 @@ app.get('/ind', async function (req, res) {
         videoDownload.videoDownload(videoInfo.url, uploadDir, videoInfo.fulltitle , async (state, downloadData) => {
             switch(state){
                 case "download-progress" :
-                    console.log("download progress : " + downloadData);
                     break;
 
                 case "download-end" :
                     let peerToken = await peerTubeApi.getAccessToken("https://peertube.tamanoir.foucry.net", "mrcharif", "124578963Mr");
-                    let uploadVideo = await peerTubeApi.upload("https://peertube.maly.io", peerToken, downloadData, uploadDir,  videoInfo);
+                    let uploadVideo = await peerTubeApi.upload("https://peertube.tamanoir.foucry.net", peerToken, downloadData, uploadDir, videoInfo);
                     console.log(uploadVideo);
                     break;
 
