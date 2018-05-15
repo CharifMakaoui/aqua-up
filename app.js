@@ -42,7 +42,7 @@ app.get('/ind', async function (req, res) {
             }
         });
 
-        res.json(info);
+        res.json(videoInfo);
     });
 });
 
