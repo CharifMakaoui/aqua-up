@@ -19,15 +19,18 @@ let peerTubeApi = require('./helpers/uploaders/peerTube');
 
 app.get('/ind', async function (req, res) {
 
-    youtubedl.getInfo("https://openload.co/embed/MPEsULsaPrU", [], {}, function (err, info) {
+    youtubedl.getInfo("https://openload.co/embed/MPEsULsaPrU", [], {}, async function (err, info) {
         if (err) {
             res.json(err);
         }
 
         let uploadDir = __dirname + "/uploads/";
 
+        let peerToken = await peerTubeApi.getAccessToken("https://peertube.maly.io", "mrcharif", "124578963Mr");
+        peerTubeApi.processVideo("https://peertube.maly.io", peerToken, info, "en");
+
         // Download video from url (this case using yt-dl)
-        videoDownload.videoDownload(info.url, uploadDir, info.fulltitle , async (state, data) => {
+        /*videoDownload.videoDownload(info.url, uploadDir, info.fulltitle , async (state, data) => {
             switch(state){
                 case "download-progress" :
                     console.log("download progress : " + data);
@@ -40,7 +43,7 @@ app.get('/ind', async function (req, res) {
 
                 default : console.log("default state")
             }
-        });
+        });*/
 
         res.json(info);
     });

@@ -11,6 +11,17 @@ function buildAbsoluteFixturePath (path) {
     return join(__dirname, '..', '..', 'api', 'fixtures', path)
 }
 
+function searchVideo (url, search) {
+    const path = '/api/v1/videos';
+    const req = request(url)
+        .get(path + '/search')
+        .query({ search })
+        .set('Accept', 'application/json');
+
+    return req.expect(200)
+        .expect('Content-Type', /json/)
+}
+
 async function uploadVideo(url, accessToken, videoAttributesArg, specialStatus = 200) {
     const path = '/api/v1/videos/upload';
     let defaultChannelId = '1';
@@ -77,5 +88,6 @@ async function uploadVideo(url, accessToken, videoAttributesArg, specialStatus =
 }
 
 module.exports = {
-    uploadVideo
+    uploadVideo,
+    searchVideo
 };

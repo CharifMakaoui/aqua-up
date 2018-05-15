@@ -12,6 +12,7 @@
     "test": "node test.js"
   },
   "dependencies": {
+    "bluebird": "^3.5.1",
     "body-parser": "*",
     "cookie-parser": "~1.4.3",
     "debug": "~2.6.9",
