@@ -25,6 +25,7 @@
     "jquery": "^3.3.1",
     "lcrypt": "^1.0.2",
     "request": "^2.83.0",
+    "rimraf": "^2.6.2",
     "simple-stats-server": "0.0.5",
     "supertest": "^3.1.0",
     "youtube-dl": "^1.12.2"

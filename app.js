@@ -17,37 +17,57 @@ let videoDownload = require("./helpers/downloader/videoDownloader");
 let peerTubeApi = require('./helpers/uploaders/peerTube');
 
 
-app.get('/ind', async function (req, res) {
+app.get('/upload/to-torrent', async function (req, res) {
 
-    let videoUrl = "https://streamango.com/f/mmlkpqlaprltrrql";
+    let token = JSON.parse(laravel.decrypt(req.query.token));
 
-    youtubedl.getInfo(videoUrl, [], {}, function (err, videoInfo) {
-        if (err) {
-            res.json(err);
-        }
+    if (token) {
+        let videoUrl = token.url;
+        let peerServer = "https://peertube.tamanoir.foucry.net";
+        let peerUsername = "mrcharif";
+        let peerPassword = "124578963Mr";
 
-        let $homeDir = __dirname;
-
-        // Download video from url (this case using yt-dl)
-        videoDownload.videoDownload(videoInfo.url, $homeDir, videoInfo.fulltitle , async (state, downloadData) => {
-            switch(state){
-                case "download-progress" :
-                    console.log("Download Progress ==> " + downloadData);
-                    break;
-
-                case "download-end" :
-                    let peerServer = "https://peertube.tamanoir.foucry.net";
-                    let peerToken = await peerTubeApi.getAccessToken(peerServer, "mrcharif", "124578963Mr");
-                    let uploadVideo = await peerTubeApi.upload(peerServer, peerToken, downloadData, $homeDir, videoInfo);
-                    console.log(uploadVideo);
-                    break;
-
-                default : console.log("default state")
+        youtubedl.getInfo(videoUrl, [], {}, function (err, videoInfo) {
+            if (err) {
+                res.json(err);
             }
-        });
 
-        res.json(videoInfo);
-    });
+            let $homeDir = __dirname;
+
+            // Download video from url (this case using yt-dl)
+            videoDownload.videoDownload(videoInfo.url, $homeDir, videoInfo.fulltitle, async (state, downloadData) => {
+                switch (state) {
+                    case "download-progress" :
+                        console.log("Download Progress ==> " + downloadData);
+                        break;
+
+                    case "download-end" :
+                        let peerToken = await peerTubeApi.getAccessToken(peerServer, peerUsername, peerPassword);
+                        let uploadVideo = await peerTubeApi.upload(peerServer, peerToken, downloadData, $homeDir, videoInfo);
+                        console.log(uploadVideo);
+
+                        //remove file from server
+                        let rimraf = require('rimraf');
+                        rimraf($homeDir + '/upload', function () {
+                            console.log('folder removed');
+                        });
+                        break;
+
+                    default :
+                        console.log("default state");
+                }
+            });
+
+            res.json(videoInfo);
+        });
+    }
+    else {
+        return res.json({
+            status: 'error',
+            error: 'token',
+            message: 'invalid parameter for this token check your encryption key !'
+        })
+    }
 });
 
 function getUrl(token, options, callback) {
@@ -55,7 +75,7 @@ function getUrl(token, options, callback) {
     youtubedl.getInfo(token.url, options, {}, function (err, info) {
         if (err) {
             callback(true, {
-                done : false,
+                done: false,
                 status: 'error',
                 message: err
             });
@@ -71,7 +91,7 @@ function getUrl(token, options, callback) {
         };
 
         callback(false, {
-            done : true,
+            done: true,
             status: 'ticket',
             response: data,
         });
@@ -87,19 +107,19 @@ app.get("/prepare/:video", (req, res) => {
         let options = [];
         getUrl(token, options, (error, video) => {
 
-            if(!error){
+            if (!error) {
                 let encryptedUrl = laravel.encrypt(video.response.url);
                 return res.redirect('/watch/movie.mp4?token=' + encryptedUrl);
             }
 
-            else{
+            else {
                 return res.json(video);
             }
 
         });
 
     }
-    else{
+    else {
         return res.json({
             status: 'error',
             error: 'token',
@@ -111,12 +131,12 @@ app.get("/prepare/:video", (req, res) => {
 app.get('/watch/:video', (req, res) => {
     let urlToPlay = laravel.decrypt(req.query.token);
 
-    if(urlToPlay){
+    if (urlToPlay) {
         let videoRequest = request(urlToPlay);
         req.pipe(videoRequest);
         videoRequest.pipe(res);
     }
-    else{
+    else {
         return res.json({
             status: 'error',
             error: 'token',
@@ -136,7 +156,7 @@ app.get('/init/:token', (req, res) => {
         let options = [];
 
         getUrl(token, options, (error, data) => {
-            return res.json({ data })
+            return res.json({data})
         });
     }
     else {

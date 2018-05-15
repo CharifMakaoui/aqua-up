@@ -37,8 +37,9 @@ async function getAccessToken(url, username, password) {
 
 async function upload(url, accessToken, $filePath, $homeDir, videoInfo) {
 
-    let thumbImage = undefined;
+    await accessPromise($filePath, constants.F_OK);
 
+    let thumbImage = undefined;
     if(videoInfo.thumbnail){
         const options = {
             url: videoInfo.thumbnail,
@@ -47,13 +48,10 @@ async function upload(url, accessToken, $filePath, $homeDir, videoInfo) {
 
         const { filename, image } = await download.image(options);
         thumbImage = filename;
+        await accessPromise(thumbImage, constants.F_OK);
     }
 
-
     console.log(thumbImage);
-
-    await accessPromise($filePath, constants.F_OK);
-    await accessPromise(thumbImage, constants.F_OK);
 
     console.log('Uploading %s video...', videoInfo.title);
 
