@@ -30,6 +30,7 @@ app.get('/ind', async function (req, res) {
         videoDownload.videoDownload(videoInfo.url, uploadDir, videoInfo.fulltitle , async (state, downloadData) => {
             switch(state){
                 case "download-progress" :
+                    console.log("Download Progress ==> " + downloadData);
                     break;
 
                 case "download-end" :

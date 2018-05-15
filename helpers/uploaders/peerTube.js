@@ -37,17 +37,26 @@ async function getAccessToken(url, username, password) {
 
 async function upload(url, accessToken, $filePath, $thumbPath, videoInfo) {
 
-    const options = {
-        url: videoInfo.thumbnail,
-        dest: $thumbPath
-    };
+    let thumbImage = null;
 
-    const { filename, image } = await download.image(options);
+    if(videoInfo.thumbnail){
+        const options = {
+            url: videoInfo.thumbnail,
+            dest: $thumbPath
+        };
 
-    console.log(filename);
+        const { filename, image } = await download.image(options);
+        thumbImage = filename;
+    }
+    else {
+        thumbImage = __dirname + "/../../public/thumb.png"
+    }
+
+
+    console.log(thumbImage);
 
     await accessPromise($filePath, constants.F_OK);
-    await accessPromise(filename, constants.F_OK);
+    await accessPromise(thumbImage, constants.F_OK);
 
     console.log('Uploading %s video...', videoInfo.title);
 
@@ -63,8 +72,8 @@ async function upload(url, accessToken, $filePath, $thumbPath, videoInfo) {
         tags : ['aquaScreen', "movie"],
         privacy: 1,
         fixture: $filePath,
-        thumbnailfile : filename,
-        previewfile: filename
+        thumbnailfile : thumbImage,
+        previewfile: thumbImage
     };
 
     let videoData = await peerVideos.uploadVideo(url, accessToken, videoAttributes);

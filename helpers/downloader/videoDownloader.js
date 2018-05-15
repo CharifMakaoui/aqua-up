@@ -4,7 +4,7 @@ module.exports.videoDownload = function (file_url, DOWNLOAD_DIR, file_name, call
 
     let fs = require('fs');
     let url = require('url');
-    let https = require('follow-redirects').https;
+    let https = require('follow-redirects').http;
     let exec = require('child_process').exec;
 
 
