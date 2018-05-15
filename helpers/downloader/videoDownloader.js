@@ -4,10 +4,8 @@ module.exports.videoDownload = function (file_url, DOWNLOAD_DIR, file_name, call
 
     let fs = require('fs');
     let url = require('url');
-    let http = require('follow-redirects').http;
     let https = require('follow-redirects').https;
     let exec = require('child_process').exec;
-    let spawn = require('child_process').spawn;
 
 
     // We will be downloading the files to a directory, so make sure it's there

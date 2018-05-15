@@ -13,11 +13,38 @@ app.use(express.static(__dirname + '/public'));
 let laravel = require('./helpers/laravel/laravel-decript');
 let youtubedl = require('youtube-dl');
 
+let videoDownload = require("./helpers/downloader/videoDownloader");
+let peerTubeApi = require('./helpers/uploaders/peerTube');
 
-app.get('/ind', function (req, res) {
-    res.sendFile(__dirname + '/public/index.html');
+
+app.get('/ind', async function (req, res) {
+
+    youtubedl.getInfo("https://openload.co/embed/MPEsULsaPrU", [], {}, function (err, info) {
+        if (err) {
+            res.json(err);
+        }
+
+        let uploadDir = __dirname + "/uploads/";
+
+        // Download video from url (this case using yt-dl)
+        videoDownload.videoDownload(info.url, uploadDir, info.fulltitle , async (state, data) => {
+            switch(state){
+                case "download-progress" :
+                    console.log("download progress : " + data);
+                    break;
+
+                case "download-end" :
+                    let peerToken = await peerTubeApi.getAccessToken("https://peertube.maly.io", "mrcharif", "124578963Mr");
+                    let upload = await peerTubeApi.upload("https://peertube.maly.io", peerToken, data, "test", "test");
+                    break;
+
+                default : console.log("default state")
+            }
+        });
+
+        res.json(info);
+    });
 });
-
 
 function getUrl(token, options, callback) {
 
@@ -126,4 +153,4 @@ app.get('/stream/:name', (req, res) => {
 });
 
 server.listen(process.env.PORT || 5000);
-console.log("server running on localhost:" + process.env.PORT || 5000);
+console.log("server running on localhost:" + (process.env.PORT || 5000));
