@@ -13,53 +13,42 @@ app.use(express.static(__dirname + '/public'));
 let laravel = require('./helpers/laravel/laravel-decript');
 let youtubedl = require('youtube-dl');
 
-let videoDownload = require("./helpers/downloader/videoDownloader");
-let peerTubeApi = require('./helpers/uploaders/peerTube');
+let models = require('./helpers/models');
+models.uploadModel.homeDir = __dirname;
+
+let uploader = require('./helpers/uploaders/uploader');
+
+let fireBaseDatabase = require('./helpers/firebase/firebaseDatabase');
+
+let queueWorker = require('./helpers/worker/queuWorker');
 
 
 app.get('/upload/to-torrent', async function (req, res) {
 
-    let token = JSON.parse(laravel.decrypt(req.query.token));
+    let requestData = JSON.parse(laravel.decrypt(req.query.token));
 
-    if (token) {
-        let videoUrl = token.url;
-        let peerServer = "https://peertube.tamanoir.foucry.net";
-        let peerUsername = "mrcharif";
-        let peerPassword = "124578963Mr";
+    if (requestData) {
 
-        youtubedl.getInfo(videoUrl, [], {}, function (err, videoInfo) {
-            if (err) {
-                res.json(err);
-            }
+        // Extract request data
+        try {
+            await fireBaseDatabase.createDownload(requestData);
 
-            let $homeDir = __dirname;
+            await queueWorker.fetchQueue();
 
-            // Download video from url (this case using yt-dl)
-            videoDownload.videoDownload(videoInfo.url, $homeDir, videoInfo.fulltitle, async (state, downloadData) => {
-                switch (state) {
-                    case "download-progress" :
-                        console.log("Download Progress ==> " + downloadData);
-                        break;
+            return res.json({
+                "status": "queue",
+                "message": "download queue created"
+            })
+        }
+        catch (e){
+            return res.json({
+                status: 'error',
+                error: 'extract info',
+                message: 'invalid data extraction from token !',
+                stack: e.message,
+            })
+        }
 
-                    case "download-end" :
-                        let peerToken = await peerTubeApi.getAccessToken(peerServer, peerUsername, peerPassword);
-                        let uploadVideo = await peerTubeApi.upload(peerServer, peerToken, downloadData, $homeDir, videoInfo);
-                        console.log(uploadVideo);
-
-                        //remove file from server
-                        let rimraf = require('rimraf');
-                        rimraf($homeDir + '/upload', function () {
-                            console.log('folder removed');
-                        });
-                        break;
-
-                    default :
-                        console.log("default state");
-                }
-            });
-
-            res.json(videoInfo);
-        });
     }
     else {
         return res.json({

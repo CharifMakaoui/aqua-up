@@ -1,6 +1,8 @@
 let request = require('supertest');
 let isAbsolute = require('path').isAbsolute;
 
+let fireBaseDatabase = require('../../../firebase/firebaseDatabase');
+
 let peerTubeUsers = require('./users');
 
 function makeGetRequest (options = {}) {
@@ -18,7 +20,6 @@ function makeGetRequest (options = {}) {
         .expect(options.statusCodeExpected)
 }
 
-
 function buildAbsoluteFixturePath (path) {
     if (isAbsolute(path)) {
         return path
@@ -27,9 +28,9 @@ function buildAbsoluteFixturePath (path) {
     return join(__dirname, '..', '..', 'api', 'fixtures', path)
 }
 
-function searchVideo (url, search) {
+function searchVideo (peerTubedModel, search) {
     const path = '/api/v1/videos';
-    const req = request(url)
+    const req = request(peerTubedModel.peerServer)
         .get(path + '/search')
         .query({ search })
         .set('Accept', 'application/json');
@@ -38,12 +39,31 @@ function searchVideo (url, search) {
         .expect('Content-Type', /json/)
 }
 
-async function uploadVideo(url, accessToken, videoAttributesArg, specialStatus = 200) {
+function getVideoCategories (peerTubedModel) {
+    const path = '/api/v1/videos/categories';
+
+    return makeGetRequest({
+        url: peerTubedModel.peerServer,
+        path : path,
+        statusCodeExpected: 200
+    })
+}
+
+async function getVideo (peerTubedModel, id, expectedStatus = 200) {
+    const path = '/api/v1/videos/' + id;
+
+    return request(peerTubedModel.peerServer)
+        .get(path)
+        .set('Accept', 'application/json')
+        .expect(expectedStatus)
+}
+
+async function uploadVideo(uploadModel, peerTubedModel, videoAttributesArg, specialStatus = 200) {
     const path = '/api/v1/videos/upload';
     let defaultChannelId = '1';
 
     try {
-        const res = await peerTubeUsers.getMyUserInformation(url, accessToken);
+        const res = await peerTubeUsers.getMyUserInformation(peerTubedModel);
         defaultChannelId = res.body.videoChannels[0].id
     } catch (e) { /* empty */ }
 
@@ -63,10 +83,10 @@ async function uploadVideo(url, accessToken, videoAttributesArg, specialStatus =
         fixture: 'video_short.webm'
     }, videoAttributesArg);
 
-    const req = request(url)
+    const req = request(peerTubedModel.peerServer)
         .post(path)
         .set('Accept', 'application/json')
-        .set('Authorization', 'Bearer ' + accessToken)
+        .set('Authorization', 'Bearer ' + peerTubedModel.peerToken)
         .field('name', attributes.name)
         .field('nsfw', attributes.nsfw)
         .field('commentsEnabled', attributes.commentsEnabled)
@@ -97,26 +117,20 @@ async function uploadVideo(url, accessToken, videoAttributesArg, specialStatus =
         req.attach('previewfile', buildAbsoluteFixturePath(attributes.previewfile))
     }
 
+    console.log('Start Upload (peertube) ...');
     return req.attach('videofile', buildAbsoluteFixturePath(attributes.fixture))
-        .on('progress', function(e) {
-            let progress = (100.0 * e.loaded / e.total).toFixed(2);
-            console.log('Percentage done: ', progress);
+        .on('progress', async function(e) {
+            let _progress = (100.0 * e.loaded / e.total).toFixed(0);
+            if(_progress % 2 === 0)
+                await fireBaseDatabase
+                    .uploadProgress(uploadModel.sessionInfo.session, peerTubedModel.serverId, _progress)
         })
         .expect(specialStatus);
-}
-
-function getVideoCategories (url) {
-    const path = '/api/v1/videos/categories';
-
-    return makeGetRequest({
-        url,
-        path,
-        statusCodeExpected: 200
-    })
 }
 
 module.exports = {
     uploadVideo,
     searchVideo,
+    getVideo,
     getVideoCategories
 };

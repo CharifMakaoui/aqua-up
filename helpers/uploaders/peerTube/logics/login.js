@@ -1,6 +1,5 @@
 let request = require('supertest');
 
-
 function login (url, client, user, expectedStatus = 200) {
 
     const path = '/api/v1/users/token';
