@@ -41,6 +41,7 @@ module.exports.videoDownload = function (uploadModel, callback) {
                 downloaded += data.length;
 
                 let progress = (100.0 * downloaded / len).toFixed(2);
+                console.log("video download progress : ", progress);
 
                 let _progress = (100.0 * downloaded / len).toFixed(0);
                 if(_progress % 2 === 0)

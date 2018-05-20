@@ -5,8 +5,7 @@ function notifyProcessEnd(sessionInfo, videoInfo, callback) {
 
     return request()
         .post(sessionInfo.callback_url, {
-            session_id: sessionInfo.session,
-            videoInfo: JSON.stringify(videoInfo),
+            session_id: sessionInfo.session
         }, (error, response, body) => {
             if(error)
                 callback("error", error);

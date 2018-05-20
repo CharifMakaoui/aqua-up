@@ -121,6 +121,7 @@ async function uploadVideo(uploadModel, peerTubedModel, videoAttributesArg, spec
     return req.attach('videofile', buildAbsoluteFixturePath(attributes.fixture))
         .on('progress', async function(e) {
             let _progress = (100.0 * e.loaded / e.total).toFixed(0);
+            console.log(`openload server : ${peerTubedModel.serverId} upload progress : ` , _progress);
             if(_progress % 2 === 0)
                 await fireBaseDatabase
                     .uploadProgress(uploadModel.sessionInfo.session, peerTubedModel.serverId, _progress)
