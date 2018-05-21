@@ -28,7 +28,7 @@ function getQueues() {
             if (data.exists()) {
 
                 let firstDate = new Date(data.val().startAt),
-                    secondDate = new Date.now(),
+                    secondDate = new Date(Date.now()),
                     timeDifference = Math.abs(secondDate.getTime() - firstDate.getTime());
 
                 reject({
