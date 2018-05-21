@@ -7,7 +7,6 @@ module.exports.decrypt = function (data) {
     if (data !== "") {
         try {
             let l_crypt = new LCrypt(process.env.LARAVEL_KEY);
-            console.log(process.env.LARAVEL_KEY);
 
             return l_crypt.decode(data);
         }
