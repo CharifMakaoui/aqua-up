@@ -44,9 +44,9 @@ module.exports.videoDownload = function (uploadModel, callback) {
                 console.log("video download progress : ", progress);
 
                 let _progress = (100.0 * downloaded / len).toFixed(0);
-                if(_progress % 2 === 0)
+                /*if(_progress % 2 === 0)
                     callback('download-progress', progress);
-                    await fireBaseDatabase.downloadProgress(uploadModel.sessionInfo.session, _progress);
+                    await fireBaseDatabase.downloadProgress(uploadModel.sessionInfo.session, _progress);*/
 
             }).on('end', function() {
                 file.end();
