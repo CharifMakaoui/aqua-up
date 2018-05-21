@@ -33,6 +33,8 @@ module.exports.videoDownload = function (uploadModel, callback) {
 
         https.get(options, function(res) {
 
+            let startTime = (new Date()).getTime();
+
             let len = parseInt(res.headers['content-length'], 10);
             let downloaded = 0;
 
@@ -40,8 +42,11 @@ module.exports.videoDownload = function (uploadModel, callback) {
                 file.write(data);
                 downloaded += data.length;
 
+                let now = (new Date()).getTime();
+                let speed = ((downloaded / (now - startTime)) / 24).toFixed(2);
+
                 let progress = (100.0 * downloaded / len).toFixed(2);
-                console.log("video download progress : ", progress);
+                console.log("video download progress : " + progress + " download speed : " + speed + "kb");
 
                 let _progress = (100.0 * downloaded / len).toFixed(0);
                 /*if(_progress % 2 === 0)
