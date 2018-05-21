@@ -4,8 +4,6 @@ let access = require('fs').access;
 let constants = require('fs').constants;
 let promisify = require('util').promisify;
 
-const download = require('image-downloader');
-
 const parseTorrent = require('parse-torrent');
 let libHash = require("./../../ffmpegEncoding/videoHash");
 
@@ -40,28 +38,15 @@ function upload(uploadModel, peerTubedModel) {
 
         await accessPromise(uploadModel.filePath, constants.F_OK);
 
-        // set video thumb if exist on model
-        let thumbImage = undefined;
-        if (uploadModel.videoInfo.thumbnail) {
-            const options = {
-                url: uploadModel.videoInfo.thumbnail,
-                dest: uploadModel.homeDir + "/uploads/"
-            };
-
-            const {filename, image} = await download.image(options);
-            thumbImage = filename;
-            await accessPromise(thumbImage, constants.F_OK);
-        }
-
         console.info('Uploading %s video...', uploadModel.sessionInfo.movie_name);
 
         const videoAttributes = {
-            name: uploadModel.sessionInfo.movie_name,
-            description: uploadModel.sessionInfo.movie_name,
+            name: "AquaScreen movie p2p : " + uploadModel.sessionInfo.movie_name,
+            description: "AquaScreen movie p2p description : " + uploadModel.sessionInfo.movie_name,
 
             fixture: uploadModel.filePath,
-            thumbnailfile: thumbImage,
-            previewfile: thumbImage,
+            thumbnailfile: undefined,
+            previewfile: undefined,
 
             tags: uploadModel.sessionInfo.movie_name.replace(/[^a-zA-Z0-9 ]/g, "").split(' '),
 
@@ -75,7 +60,8 @@ function upload(uploadModel, peerTubedModel) {
         };
 
         try {
-            let videoData = await peerVideos.uploadVideo(uploadModel, peerTubedModel, videoAttributes);
+
+            let videoData = await peerVideos.uploadVideo(peerTubedModel, videoAttributes);
 
             console.info("uploaded video body response : ", videoData.body.video);
             console.info(`Video ${uploadModel.sessionInfo.movie_name} uploaded. uuid ==> ${videoData.body.video.uuid}`);
