@@ -14,8 +14,9 @@ function fetchQueue() {
 
     let store = new Storage('./../../store.json');
     let RunningQueue = store.get('RunningQueue');
+    console.log("RunningQueue : " + RunningQueue);
 
-    if(RunningQueue){
+    if(!RunningQueue || RunningQueue === undefined){
         firebaseDatabase.getQueues()
             .then(queueToStart => {
                 store.put('RunningQueue', true);
@@ -27,15 +28,23 @@ function fetchQueue() {
 
                 store.put('RunningQueue', false);
                 console.log("Queue finished");
+                fetchNextQueue()
             })
             .catch(data => {
                 console.log("error queue : ", data);
+                fetchNextQueue()
             });
     } else {
         console.log("another queue in progress");
+        fetchNextQueue()
     }
 
+}
 
+function fetchNextQueue(){
+    setTimeout(() => {
+        fetchQueue();
+    }, 1000 * 60 * 5);
 }
 
 function startQueue(queueToStart) {
