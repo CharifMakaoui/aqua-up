@@ -5,6 +5,8 @@ let peerTubeApi = require('./peerTube/peerTube');
 let openloadApi = require('./openLoad/openload');
 let dTubeApi = require('./dTube/dtube');
 
+let webHookCallback = require('./../laravel/webHookCallback');
+
 async function initUploader(uploadModel) {
 
     let listPromises = [];
@@ -51,10 +53,19 @@ function peerTubeUploader(uploadModel, server) {
 
             peerTubeApi.upload(uploadModel, peerTubeModel)
                 .then(async (uploadVideo) => {
+
                     await fireBaseDatabase
                         .setVideoDataComplete(uploadModel.sessionInfo.session, peerTubeModel.serverId, uploadVideo);
 
-                    resolve('done');
+                    if(uploadVideo.type && uploadVideo.type === "error"){
+                        console.log("promise error : ", uploadVideo.message)
+                    }
+                    else{
+                        let callbackWebHook = await webHookCallback.notifyUploadDone(uploadModel.sessionInfo, uploadVideo);
+                        console.log("save video to : ", callbackWebHook.body);
+                        resolve('done');
+                    }
+
                 })
                 .catch(error => {
                     console.log(error);
@@ -82,9 +93,17 @@ function openLoadUploader(uploadModel, server) {
 
         openloadApi.openLoadUpload(uploadModel, openLoadModel)
             .then(async (uploadVideo) => {
-                await fireBaseDatabase.setVideoDataComplete(uploadModel.sessionInfo.session, server.id, uploadVideo);
+                await fireBaseDatabase
+                    .setVideoDataComplete(uploadModel.sessionInfo.session, openLoadModel.serverId, uploadVideo);
 
-                resolve('done');
+                if(uploadVideo.type && uploadVideo.type === "error"){
+                    console.log("promise error : ", uploadVideo.message)
+                }
+                else{
+                    let callbackWebHook = await webHookCallback.notifyUploadDone(uploadModel.sessionInfo, uploadVideo);
+                    console.log("save video to : ", callbackWebHook.body);
+                    resolve('done');
+                }
             }).catch(error => {
                 reject(error);
             });

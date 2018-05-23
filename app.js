@@ -34,6 +34,8 @@ app.get('/upload/to-torrent', async function (req, res) {
         try {
             await fireBaseDatabase.createDownload(requestData);
 
+            queueWorker.fetchQueue();
+
             return res.json({
                 "status": "queue",
                 "message": "download queue created"
