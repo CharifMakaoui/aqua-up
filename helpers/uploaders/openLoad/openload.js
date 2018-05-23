@@ -48,7 +48,10 @@ function openLoadUpload(uploadModel, openLoadModel) {
             });
         }
         catch (e){
-            reject(e);
+            resolve({
+                type: "error",
+                message: e
+            })
         }
 
 

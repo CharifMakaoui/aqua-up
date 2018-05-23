@@ -23,31 +23,53 @@ function getQueues() {
     return new Promise((resolve, reject) => {
         const ref = db.ref(server_upload_ref);
 
-        ref.orderByChild('queue').equalTo("starting").limitToFirst(1).once('value', data => {
+        ref.orderByChild('queue').equalTo("starting").once('value', data => {
 
             if (data.exists()) {
 
-                let firstDate = new Date(data.val().startAt),
-                    secondDate = new Date(Date.now()),
-                    timeDifference = Math.abs(secondDate.getTime() - firstDate.getTime());
+                data.forEach(snap => {
+                    let dateNow = new Date();
+                    let startAt = snap.val().startAt;
+                    let diffMs = (dateNow - startAt);
+                    let diffMins = Math.round(((diffMs % 86400000) % 3600000) / 60000); // minutes
 
-                reject({
-                    status: "busy",
-                    message: "worker in progress for now started before : " + timeDifference
-                })
+                    if(diffMins > 30){
+                        snap.ref.update({
+                            queue: "ready",
+                            startAt: null,
+                            serverID: null
+                        })
+                    }
+
+                    reject({
+                        status: "busy",
+                        message: "worker in progress for now started before : " + diffMins + " minutes"
+                    })
+                });
+
+            }
+            else{
+                ref.orderByChild('queue').equalTo("ready").limitToFirst(1).once('value', snapshot => {
+
+                    if(snapshot.exists()){
+                        let sessionInfo = null;
+                        snapshot.forEach(function (data) {
+                            sessionInfo = data.val();
+                        });
+                        resolve({
+                            status: "ready",
+                            data: sessionInfo
+                        });
+                    }else{
+                        reject({
+                            status: "no queue for now"
+                        });
+                    }
+
+                });
             }
 
-            ref.orderByChild('queue').equalTo("ready").limitToFirst(1).once('value', snapshot => {
 
-                let sessionInfo = null;
-                snapshot.forEach(function (data) {
-                    sessionInfo = data.val();
-                });
-                resolve({
-                    status: "ready",
-                    data: sessionInfo
-                });
-            });
         });
     });
 
@@ -58,7 +80,8 @@ async function startQueue(sessionInfo) {
 
     return await ref.update({
         queue: "starting",
-        startAt: Date.now()
+        startAt: Date.now(),
+        serverID : process.env.SERVER_UNIQUE_KEY
     });
 }
 
@@ -67,18 +90,46 @@ async function finishQueue(sessionInfo) {
 
     return await ref.update({
         queue: "finished",
-        endAt: Date.now()
+        endAt: Date.now(),
+        serverID : null
     });
 }
 
 async function createDownload(sessionInfo) {
     let ref = db.ref(server_upload_ref + sessionInfo.session);
 
-    let dataSave = Object.assign(sessionInfo, {
-        queue: "ready"
-    });
+    ref.once('value', snap => {
+        let dataSave;
 
-    return await ref.update(dataSave);
+        if(snap.exists()){
+            let lastServers = snap.val().servers;
+            console.log(lastServers);
+
+            let newServers = sessionInfo.servers;
+            console.log(newServers);
+
+            Object.values(newServers).map(server => {
+                lastServers.push(server)
+            });
+
+            sessionInfo.servers = lastServers;
+
+            sessionInfo.servers = sessionInfo.servers.filter((server, index, self) =>
+                index === self.findIndex((t) => (
+                    t.id === server.id && t.server_name === server.server_name
+                ))
+            );
+
+            dataSave = Object.assign(snap.val(), sessionInfo, { queue: "ready" });
+        }
+        else {
+             dataSave = Object.assign(sessionInfo, {
+                queue: "ready"
+            });
+        }
+
+        return ref.update(dataSave);
+    });
 }
 
 async function downloadProgress(sessionId, progress) {

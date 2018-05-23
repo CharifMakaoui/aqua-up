@@ -25,6 +25,7 @@
     "image-downloader": "^3.3.0",
     "jquery": "^3.3.1",
     "lcrypt": "^1.0.2",
+    "node-storage": "0.0.7",
     "parse-torrent": "^6.0.0",
     "request": "^2.83.0",
     "rimraf": "^2.6.2",

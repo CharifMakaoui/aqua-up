@@ -7,31 +7,49 @@ let uniqid = require('uniqid'),
     videoDownload = require("./../../helpers/downloader/videoDownloader"),
     uploader = require('./../../helpers/uploaders/uploader');
 
+let Storage = require('node-storage');
 
 
-async function fetchQueue() {
-    firebaseDatabase.getQueues()
-        .then(data => {
-            return startQueue(data);
-        })
-        .then(async (sessionInfo) => {
-            // Queue download and upload was finished :
-            await firebaseDatabase.finishQueue(sessionInfo);
+function fetchQueue() {
 
-            console.log("Queue finished");
-        })
-        .catch(data => {
-            console.log("error queue : ", data);
-        });
+    let store = new Storage('./../../store.json');
+    let RunningQueue = store.get('RunningQueue');
+
+    if(RunningQueue){
+        firebaseDatabase.getQueues()
+            .then(queueToStart => {
+                store.put('RunningQueue', true);
+                return startQueue(queueToStart);
+            })
+            .then(async (sessionInfo) => {
+                // Queue download and upload was finished :
+                await firebaseDatabase.finishQueue(sessionInfo);
+
+                store.put('RunningQueue', false);
+                console.log("Queue finished");
+            })
+            .catch(data => {
+                console.log("error queue : ", data);
+            });
+    } else {
+        console.log("another queue in progress");
+    }
+
+
 }
 
-async function startQueue(queueToStart) {
+function startQueue(queueToStart) {
+    return new Promise(async (resolve, reject) => {
 
-    models.uploadModel.sessionInfo = queueToStart.data;
+        if (!queueToStart) {
+            reject("no queue at available at this time");
+            return;
+        }
 
-    await firebaseDatabase.startQueue(models.uploadModel.sessionInfo);
+        models.uploadModel.sessionInfo = queueToStart.data;
 
-    return new Promise((resolve, reject) => {
+        await firebaseDatabase.startQueue(models.uploadModel.sessionInfo);
+
 
         youtubeDl.getInfo(models.uploadModel.sessionInfo.videoUrl, [], {}, function (err, videoInfo) {
             if (err) {

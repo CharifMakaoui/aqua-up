@@ -22,6 +22,7 @@ let fireBaseDatabase = require('./helpers/firebase/firebaseDatabase');
 
 let queueWorker = require('./helpers/worker/queuWorker');
 
+queueWorker.fetchQueue();
 
 app.get('/upload/to-torrent', async function (req, res) {
 
@@ -32,8 +33,6 @@ app.get('/upload/to-torrent', async function (req, res) {
         // Extract request data
         try {
             await fireBaseDatabase.createDownload(requestData);
-
-            await queueWorker.fetchQueue();
 
             return res.json({
                 "status": "queue",

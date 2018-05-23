@@ -3,21 +3,32 @@
 let fireBaseDatabase = require('./../firebase/firebaseDatabase');
 let peerTubeApi = require('./peerTube/peerTube');
 let openloadApi = require('./openLoad/openload');
+let dTubeApi = require('./dTube/dtube');
 
 async function initUploader(uploadModel) {
 
     let listPromises = [];
 
     Object.values(uploadModel.sessionInfo.servers).map(server => {
-        switch (server.credential.server_original) {
-            case "peertube" :
-                listPromises.push(peerTubeUploader(uploadModel, server));
-                break;
+        if(!(server.status && server.status === "finished")){
+            switch (server.credential.server_original) {
+                case "peertube" :
+                    listPromises.push(peerTubeUploader(uploadModel, server));
+                    break;
 
-            case "openload" :
-                listPromises.push(openLoadUploader(uploadModel, server));
-                break;
+                case "openload" :
+                    listPromises.push(openLoadUploader(uploadModel, server));
+                    break;
+
+                case "dtube" :
+                    listPromises.push(dTubeUploader(uploadModel, server));
+                    break;
+            }
         }
+        else{
+            console.log("upload to this server : " + server.id + " is finished before that")
+        }
+
     });
 
     return await Promise.all(listPromises);
@@ -78,6 +89,26 @@ function openLoadUploader(uploadModel, server) {
                 reject(error);
             });
     })
+}
+
+function dTubeUploader(uploadModel, server) {
+    let dtubeModel = {
+        uploadServer : null,
+        uploadToken : null,
+        serverId : server.id,
+    };
+
+    return new Promise((resolve, reject) => {
+        dTubeApi.uploadFile(uploadModel, dtubeModel)
+            .then(async (uploadVideo) => {
+
+                await fireBaseDatabase.setVideoDataComplete(uploadModel.sessionInfo.session, server.id, uploadVideo);
+
+                resolve('done');
+            }).catch(error => {
+                reject(error);
+            })
+    });
 }
 
 module.exports = {

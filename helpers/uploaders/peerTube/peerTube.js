@@ -105,7 +105,7 @@ function upload(uploadModel, peerTubedModel) {
 
         }
         catch (e) {
-            reject({
+            resolve({
                 type: "error",
                 message: e
             })
