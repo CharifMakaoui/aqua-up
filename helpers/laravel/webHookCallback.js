@@ -1,12 +1,31 @@
 "use strict";
 let request = require('request');
+let url = require('url');
 
-async function notifyUploadDone(sessionInfo, uploadedVideo) {
+function notifyUploadDone(sessionInfo, uploadedVideo) {
 
-    return request()
-        .post(sessionInfo.callback_webhook, uploadedVideo)
-        .expect(200)
+    let listPromises = [];
 
+    uploadedVideo.map(video => {
+        let req = new Promise((resolve, reject)=>{
+            request.post({
+                url: sessionInfo.callback_webhook,
+                body: video,
+                json: true
+            },  (error, response, body) =>{
+                if(error){
+                    reject(error);
+                }
+                else{
+                    resolve(body)
+                }
+            })
+        });
+
+        listPromises.push(req);
+    });
+
+    return Promise.all(listPromises);
 }
 
 module.exports = {

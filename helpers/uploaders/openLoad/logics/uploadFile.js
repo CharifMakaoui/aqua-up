@@ -1,8 +1,6 @@
 let request = require('supertest');
 let url = require('url');
 
-let fireBaseDatabase = require('../../../firebase/firebaseDatabase');
-
 async function openLoadUploadFile(uploadModel, openLoadModel, specialStatus = 200) {
 
     let options = {

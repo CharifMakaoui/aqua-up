@@ -32,6 +32,7 @@ function fetchQueue() {
             })
             .catch(data => {
                 console.log("error queue : ", data);
+                store.put('RunningQueue', false);
                 fetchNextQueue()
             });
     } else {

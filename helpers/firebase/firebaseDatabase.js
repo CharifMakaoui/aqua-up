@@ -150,7 +150,7 @@ async function uploadProgress(sessionId, serverId, progress) {
     });
 }
 
-async function setVideoDataComplete(sessionId, serverId, videoInfo) {
+async function setVideoDataComplete(sessionId, serverId, videoInfo , status = {status: "finished"}) {
     db.ref(server_upload_ref + sessionId + '/servers/')
         .orderByChild('id').equalTo(serverId).limitToFirst(1)
         .once('value', (snapshot) => {
@@ -158,7 +158,7 @@ async function setVideoDataComplete(sessionId, serverId, videoInfo) {
 
                 snapshot.forEach(data => {
                     data.ref.update({
-                        status: 'finished',
+                        status: status.status,
                     });
                 });
             }
@@ -167,7 +167,7 @@ async function setVideoDataComplete(sessionId, serverId, videoInfo) {
     let ref = db.ref(server_upload_ref + sessionId + "/upload/server__" + serverId);
 
     await ref.update({
-        status: 'finished',
+        status: status.status,
         upload_progress: 100,
         files: videoInfo
     });
