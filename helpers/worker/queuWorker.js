@@ -12,7 +12,7 @@ let Storage = require('node-storage');
 
 function fetchQueue() {
 
-    let store = new Storage('./../../store.json');
+    let store = new Storage('/store.json');
     let RunningQueue = store.get('RunningQueue');
     console.log("RunningQueue : " + RunningQueue);
 
